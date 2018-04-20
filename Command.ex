@@ -9,6 +9,10 @@ defmodule Command do
     end
   end
 
+  @doc """
+    Example
+    Command.exec("query fmi | sort-by stargazers_count:desc | limit 5 | only name")
+  """
   def exec(str) do
     [command | options] = str |> String.split("|") |> Enum.map(&String.trim/1)
     [command_name, command_val] = command |> String.split(~r/\s+/)
@@ -24,5 +28,3 @@ defmodule Command do
     Logger.info options
   end
 end
-
-Command.exec("query sparktech | sort-by stargazers_count:desc | limit 5 | only name")
