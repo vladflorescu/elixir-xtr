@@ -1,6 +1,6 @@
 require Logger
 
-defmodule Command do
+defmodule Xtr.Command do
   defmodule InvalidCommandError do
     defexception [:message]
 
@@ -11,7 +11,7 @@ defmodule Command do
 
   @doc """
     Example
-    Command.exec("query fmi | sort-by stargazers_count:desc | limit 5 | only name")
+    Xtr.Command.exec("query fmi | sort-by stargazers_count:desc | limit 5 | only name")
   """
   def exec(str) do
     [command | options] = str |> String.split("|") |> Enum.map(&String.trim/1)
@@ -25,6 +25,6 @@ defmodule Command do
   end
 
   defp run_command({"query", val, options}) do
-    Logger.info options
+    Enum.join(options, " ")
   end
 end
