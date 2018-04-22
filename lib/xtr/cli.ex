@@ -46,6 +46,7 @@ defmodule Xtr.CLI do
       Xtr.Command.exec(str)
     rescue
       err in Xtr.Command.InvalidCommandError -> err.message
+      err in Xtr.Command.InvalidFilterError -> err.message
     end
 
     %{state | inside: :default} |> with_feedback(feedback)
