@@ -27,13 +27,4 @@ defmodule Xtr do
     normalize = fn str -> String.replace(str, ~r/(\r\n|\r|\n)$/, "") end
     serve(client_socket, Xtr.CLI.invoke(cli, normalize.(str)))
   end
-
-  defp read_line(client_socket) do
-    {:ok, str} = :gen_tcp.recv(client_socket, 0)
-    Xtr.Command.exec(str |> String.replace(~r/(\r\n|\r|\n)$/, ""))
-  end
-
-  defp write_line(line, client_socket) do
-    :gen_tcp.send(client_socket, line <> "\r\n")
-  end
 end
