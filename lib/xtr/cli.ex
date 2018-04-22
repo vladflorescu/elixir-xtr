@@ -24,17 +24,27 @@ defmodule Xtr.CLI do
 
   def get_current_description(%{inside: level}) do
     case level do
-      :run ->
-        "Type your command:"
-      _ ->
-        raise "Invalid `inside` value."
+      :run -> "Type your command:"
+      _ -> raise "Invalid `inside` value."
     end
   end
 
-  def invoke(%{inside: :default} = state, command) do
-    command
+  def invoke(%{inside: :default} = state, command_str) do
+    {command_id, _} = command_str
     |> Integer.parse()
     |> (fn ({number, _}) -> Enum.at(@commands, number - 1) end).()
-    |> (fn ({command, _}) -> %{state | inside: command} end).()
+
+    if command_id == :exit do
+      :exit |> with_feedback(nil)
+    else
+      %{state | inside: command_id} |> with_feedback(nil)
+    end
+  end
+
+  def invoke(%{inside: :run} = state, command) do
+  end
+
+  defp with_feedback(x, msg) do
+    {x, msg}
   end
 end

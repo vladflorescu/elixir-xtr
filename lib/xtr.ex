@@ -10,7 +10,7 @@ defmodule Xtr do
   defp loop_acceptor(socket) do
     {:ok, client_socket} = :gen_tcp.accept(socket)
 
-    Logger.info "Client connected"
+    Logger.info "A client connected"
     {:ok, pid} = Task.Supervisor.start_child(Xtr.TaskSupervisor, fn ->
       serve(client_socket, Xtr.CLI.init)
     end)
@@ -19,12 +19,24 @@ defmodule Xtr do
     loop_acceptor(socket)
   end
 
-  defp serve(client_socket, cli) do
-    desc = Xtr.CLI.get_current_description(cli)
-    :gen_tcp.send(client_socket, desc <> "\r\n")
+  defp serve(client_socket, cli, last_feedback \\ nil) do
+    :gen_tcp.send(client_socket, compute_client_message(cli, last_feedback))
     {:ok, str} = :gen_tcp.recv(client_socket, 0)
 
     normalize = fn str -> String.replace(str, ~r/(\r\n|\r|\n)$/, "") end
-    serve(client_socket, Xtr.CLI.invoke(cli, normalize.(str)))
+
+    case Xtr.CLI.invoke(cli, normalize.(str)) do
+      {:exit, _} ->
+        :ok = :gen_tcp.shutdown(client_socket, :write)
+        Logger.info "A client disconnected"
+      {next_cli, msg} ->
+        serve(client_socket, next_cli, msg || "")
+    end
+  end
+
+  defp compute_client_message(cli, last_feedback) do
+    desc = Xtr.CLI.get_current_description(cli)
+    desc_preffix = if last_feedback == nil, do: "", else: "\r\n" <> last_feedback
+    desc_preffix <> desc <> "\r\n"
   end
 end
