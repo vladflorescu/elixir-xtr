@@ -16,7 +16,7 @@ defmodule Xtr do
     end)
 
     :ok = :gen_tcp.controlling_process(client_socket, pid)
-    loop_acceptor(socket)
+    loop_acceptor (socket)
   end
 
   defp serve(client_socket, cli, last_feedback \\ nil) do

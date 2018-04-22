@@ -29,7 +29,13 @@ defmodule Xtr.Command do
     end
   end
 
-  defp run_command("query", val, options) do
-    Enum.join(options, " ")
+  @doc """
+  val = ["fmi", "gentlab"] (un array de nume de fisiere de pe disk)
+  options = [{"sort-by", ["stargazers_count:desc"]}, {"limit", ["5"]}, "only": ["name"]}]
+  """
+  defp run_command("query", dirs, options) do
+    #Enum.join(options, " ")
+    Logger.info("Into query - before query call");
+    Xtr.Command.Query.run(dirs, options);
   end
 end
