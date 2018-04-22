@@ -29,8 +29,8 @@ defmodule Xtr.CLI do
     end
   end
 
-  def invoke(%{inside: :default} = state, command_str) do
-    {command_id, _} = command_str
+  def invoke(%{inside: :default} = state, str) do
+    {command_id, _} = str
     |> Integer.parse()
     |> (fn ({number, _}) -> Enum.at(@commands, number - 1) end).()
 
@@ -41,7 +41,14 @@ defmodule Xtr.CLI do
     end
   end
 
-  def invoke(%{inside: :run} = state, command) do
+  def invoke(%{inside: :run} = state, str) do
+    feedback = try do
+      Xtr.Command.exec(str)
+    rescue
+      err in Xtr.Command.InvalidCommandError -> err.message
+    end
+
+    %{state | inside: :default} |> with_feedback(feedback)
   end
 
   defp with_feedback(x, msg) do

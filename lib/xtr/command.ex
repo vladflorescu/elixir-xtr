@@ -15,7 +15,7 @@ defmodule Xtr.Command do
   """
   def exec(str) do
     [command | options] = str |> String.split("|") |> Enum.map(&String.trim/1)
-    [command_name, command_val] = command |> String.split(~r/\s+/)
+    [command_name | command_val] = command |> String.split(~r/\s+/)
 
     try do
       run_command({command_name, command_val, options})

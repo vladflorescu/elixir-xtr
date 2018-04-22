@@ -36,7 +36,7 @@ defmodule Xtr do
 
   defp compute_client_message(cli, last_feedback) do
     desc = Xtr.CLI.get_current_description(cli)
-    desc_preffix = if last_feedback == nil, do: "", else: "\r\n" <> last_feedback
+    desc_preffix = if last_feedback == nil, do: "", else: last_feedback <> "\r\n\r\n"
     desc_preffix <> desc <> "\r\n"
   end
 end
