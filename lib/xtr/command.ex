@@ -9,6 +9,14 @@ defmodule Xtr.Command do
     end
   end
 
+  defmodule InvalidFilterError do
+    defexception [:message]
+
+    def exception(value) do
+      %InvalidFilterError{message: "Invalid filter: #{value}."}
+    end
+  end
+
   @doc """
     Example
     Xtr.Command.exec("query fmi | sort-by stargazers_count:desc | limit 5 | only name stars")
@@ -33,7 +41,11 @@ defmodule Xtr.Command do
     Xtr.Command.Fetch.run(val, options)
   end
 
-  defp run_command("query", val, options) do
-    Enum.join(options, " ")
+  @doc """
+  val = ["fmi", "gentlab"] (un array de nume de fisiere de pe disk)
+  options = [{"sort-by", ["stargazers_count:desc"]}, {"limit", ["5"]}, "only": ["name"]}]
+  """
+  defp run_command("query", dirs, options) do
+    Xtr.Command.Query.run(dirs, options);
   end
 end
