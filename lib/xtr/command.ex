@@ -25,16 +25,20 @@ defmodule Xtr.Command do
     [command | options_strs] = str |> String.split("|") |> Enum.map(&String.trim/1)
     [command_name | command_val] = command |> String.split(~r/\s+/)
 
-    try do
+    # try do
       options = Enum.map(options_strs, fn str ->
         [name | values] = String.split(str, " ")
         {name, values}
       end)
 
       run_command(command_name, command_val, options)
-    rescue
-      FunctionClauseError -> raise InvalidCommandError, command_name
-    end
+    # rescue
+    #   FunctionClauseError -> raise InvalidCommandError, command_name
+    # end
+  end
+
+  defp run_command("fetch", val, options) do
+    Xtr.Command.Fetch.run(val, options)
   end
 
   @doc """
