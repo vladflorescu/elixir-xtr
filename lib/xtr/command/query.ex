@@ -35,20 +35,15 @@ defmodule Xtr.Command.Query do
   end
 
   defp applyFilter("only", filters, files) do
-    Enum.map(
-      files,
-      fn file ->
-        Enum.reduce(
-          file,
-          %{},
-          fn ({key, value}, acc) ->
-            if(Enum.member?(filters, key)) do
-              Map.put(acc, key, value)
-            else
-              acc
-            end
-          end)
-      end);
+    Enum.map(files, fn file ->
+      Enum.reduce(file, %{}, fn ({key, value}, acc) ->
+        if(Enum.member?(filters, key)) do
+          Map.put(acc, key, value)
+        else
+          acc
+        end
+      end)
+    end);
   end
 
   defp applyFilter("limit", [count | _ ], files) do
