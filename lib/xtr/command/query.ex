@@ -12,10 +12,10 @@ defmodule Xtr.Command.Query do
 
     #load files from dirs into array
     files = dirs
-      |> Enum.map(&Path.wildcard("./data/#{&1}/*.json"))
-      |> Enum.map(&File.read!(&1))
-      |> Enum.map(&Poison.decode!(~s(#{&1})))
-      |> List.flatten;
+            |> Enum.reduce([], fn(path, acc) -> acc ++ Path.wildcard("./data/#{path}/*.json") end)
+            |> Enum.map(&File.read!(&1))
+            |> Enum.map(&Poison.decode!(~s(#{&1})))
+            |> List.flatten;
 
     #apply filters on files
     IO.puts "Options = #{inspect options}";
@@ -49,7 +49,11 @@ defmodule Xtr.Command.Query do
     Enum.take(files, elem(Integer.parse(count), 0));
   end
 
-  defp applyFilter(invalidFilter, values, acc) do
+  defp applyFilter("unique", _, files) do
+    Enum.uniq(files);
+  end
+
+  defp applyFilter(invalidFilter, _, _) do
     raise Xtr.Command.InvalidFilterError, invalidFilter;
   end
 
