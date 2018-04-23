@@ -14,29 +14,51 @@ defmodule Xtr.Command.Query do
     files = dirs
       |> Enum.map(&Path.wildcard("./data/#{&1}/*.json"))
       |> Enum.map(&File.read!(&1))
-      |> Enum.join;
+      |> Enum.map(&Poison.decode!(~s(#{&1})))
+      |> List.flatten;
 
-    #apply options to array
-#    Enum.reduce([{"sort-by", ["1, 2"]}, {"only", ["3", "4"]}], "", fn ({filter, vals}, acc) -> Enum.join([filter, acc], ",") end)
-    Enum.reduce(options, files, fn({filter, values}, acc) -> applyOption(filter, values, acc) end);
+#    files = ["dir2"] |> Enum.map(&Path.wildcard("./data/#{&1}/*.json")) |> Enum.map(&File.read!(&1)) |> Enum.map(&Poison.decode!(~s(#{&1}))) |> List.flatten;
+#    filters = ["id", "name"]
+#    options = [{"only", ["name"]}]
+#    query dir1 | only name
+
+    #apply filters on files
+    updatedFiles = Enum.reduce(options, files, fn({filter, values}, acc) -> applyFilter(filter, values, acc) end);
+
+    "#{inspect updatedFiles}";
   end
 
-  defp applyOption("sort-by", values, acc) do
+  defp applyFilter("sort-by", filters, files) do
     Logger.info("In sort-by method");
-    acc
+    Enum.reduce(filters, files, fn(filter, acc) -> Enum.sort_by(acc, fn mapp -> mapp[filter] end) end);
   end
 
-  defp applyOption("only", values, acc) do
+  defp applyFilter("only", filters, files) do
     Logger.info("In only method");
-    acc
+    #keep only properties which are found in filters
+
+    Enum.map(
+        files,
+        fn file ->
+                Enum.reduce(
+                    file,
+                    %{},
+                    fn ({key, value}, acc) ->
+                       if(Enum.member?(filters, key)) do
+                         Map.put(acc, key, value)
+                       else
+                         acc
+                       end
+                    end)
+        end);
   end
 
-  defp applyOption("limit", values, acc) do
+  defp applyFilter("limit", [count | tail], files) do
     Logger.info("In limit method!")
-    acc
+    Enum.take(files, count);
   end
 
-  defp applyOption(invalidFilter, values, acc) do
+  defp applyFilter(invalidFilter, values, acc) do
     raise Xtr.Command.InvalidFilterError, invalidFilter;
   end
 
