@@ -25,7 +25,13 @@ defmodule Xtr.Command.Query do
   end
 
   defp applyFilter("sort-by", filters, files) do
-    Enum.reduce(filters, files, fn(filter, acc) -> Enum.sort_by(acc, fn mapp -> mapp[filter] end) end);
+    direction = Enum.take(filters, -1) |> List.first;
+
+    case direction do
+      "desc" -> Enum.reduce(filters, files, fn(filter, acc) -> Enum.sort_by(acc, fn mapp -> mapp[filter] end, &>=/2) end);
+      _ -> Enum.reduce(filters, files, fn(filter, acc) -> Enum.sort_by(acc, fn mapp -> mapp[filter] end, &<=/2) end);
+    end
+
   end
 
   defp applyFilter("only", filters, files) do
@@ -45,7 +51,7 @@ defmodule Xtr.Command.Query do
       end);
   end
 
-  defp applyFilter("limit", [count | tail], files) do
+  defp applyFilter("limit", [count | _ ], files) do
     Enum.take(files, elem(Integer.parse(count), 0));
   end
 
