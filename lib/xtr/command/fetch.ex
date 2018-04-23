@@ -1,11 +1,16 @@
 require IEx
 require Logger
 
+#for c <- ["a", "b", "c", "d"], do: Task.start_link fn -> File.open("data/hello", [:write]) |> elem(1) |> (fn file -> (for i <- 1..500000, do: c) |> Enum.join("") |> (fn str -> IO.binwrite(file, str) end).() end).() |> Logger.info end
 defmodule Xtr.Command.Fetch do
-  #for c <- ["a", "b", "c", "d"], do: Task.start_link fn -> File.open("data/hello", [:write]) |> elem(1) |> (fn file -> (for i <- 1..500000, do: c) |> Enum.join("") |> (fn str -> IO.binwrite(file, str) end).() end).() |> Logger.info end
+  @doc"""
+    ## Examples
+    iex> fetch vsilviu vladflorescu94 | into fmi altceva
+  """
   def run(usernames, [{"into", group_names}]) do
-    # fetch vsilviu vladflorescu94 | into fmi altceva
-    data = Task.async_stream(usernames, fn(username) ->
+    data = usernames
+    |> Enum.uniq
+    |> Task.async_stream(fn(username) ->
       case HTTPoison.get("https://api.github.com/users/#{username}/repos") do
         {:error, err} -> {username, :error}
         {:ok, %{status_code: 404}} -> {username, :not_found}
@@ -39,7 +44,7 @@ defmodule Xtr.Command.Fetch do
         dirpath = Path.join("data", group_name)
         if (!File.dir?(dirpath)), do: File.mkdir(dirpath)
         {:ok, file} = File.open(Path.join(dirpath, "#{username}.json"), [:write])
-        Logger.info((Path.join(dirpath, "#{username}.json")))
+        Logger.info("Saved new file: #{(Path.join(dirpath, "#{username}.json"))}")
         IO.binwrite(file, json)
       end)
     end)
