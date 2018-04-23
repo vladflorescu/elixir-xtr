@@ -25,16 +25,12 @@ defmodule Xtr.Command do
     [command | options_strs] = str |> String.split("|") |> Enum.map(&String.trim/1)
     [command_name | command_val] = command |> String.split(~r/\s+/)
 
-    # try do
-      options = Enum.map(options_strs, fn str ->
-        [name | values] = String.split(str, " ")
-        {name, values}
-      end)
+    options = Enum.map(options_strs, fn str ->
+      [name | values] = String.split(str, " ")
+      {name, values}
+    end)
 
-      run_command(command_name, command_val, options)
-    # rescue
-    #   FunctionClauseError -> raise InvalidCommandError, command_name
-    # end
+    run_command(command_name, command_val, options)
   end
 
   defp run_command("fetch", val, options) do
@@ -47,5 +43,9 @@ defmodule Xtr.Command do
   """
   defp run_command("query", dirs, options) do
     Xtr.Command.Query.run(dirs, options);
+  end
+
+  defp run_command(command_name, _, _) do
+    raise Xtr.Command.InvalidCommandError, command_name
   end
 end
