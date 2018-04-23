@@ -31,6 +31,10 @@ defmodule Xtr.CLI do
     end
   end
 
+  def invoke(state, ":back") do
+    %{state | inside: :default} |> with_feedback(nil);
+  end
+
   def invoke(%{inside: :default} = state, str) do
     {command_id, _} = str
     |> Integer.parse()
